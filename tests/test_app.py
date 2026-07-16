@@ -1,17 +1,50 @@
 import httpx
 from fastapi.testclient import TestClient
+from pathlib import Path
 
 from app.main import create_app
 
 
-def test_index_and_security_headers() -> None:
-    with TestClient(create_app()) as client:
+def frontend_dist(tmp_path: Path) -> Path:
+    dist = tmp_path / "dist"
+    assets = dist / "assets"
+    assets.mkdir(parents=True)
+    (dist / "index.html").write_text(
+        '<main id="root">MOVIEMIND</main><script src="/assets/app.js"></script>',
+        encoding="utf-8",
+    )
+    (assets / "app.js").write_text("console.log('MovieMind')", encoding="utf-8")
+    (dist / "favicon.svg").write_text("<svg></svg>", encoding="utf-8")
+    return dist
+
+
+def test_index_and_security_headers(tmp_path: Path) -> None:
+    with TestClient(create_app(frontend_dist=frontend_dist(tmp_path))) as client:
         response = client.get("/")
 
     assert response.status_code == 200
     assert "MOVIEMIND" in response.text
     assert response.headers["x-frame-options"] == "DENY"
     assert "default-src 'self'" in response.headers["content-security-policy"]
+
+
+def test_spa_route_and_built_assets(tmp_path: Path) -> None:
+    with TestClient(create_app(frontend_dist=frontend_dist(tmp_path))) as client:
+        route_response = client.get("/favorites")
+        asset_response = client.get("/assets/app.js")
+
+    assert route_response.status_code == 200
+    assert "MOVIEMIND" in route_response.text
+    assert asset_response.status_code == 200
+    assert "MovieMind" in asset_response.text
+
+
+def test_missing_frontend_build_returns_instructions(tmp_path: Path) -> None:
+    with TestClient(create_app(frontend_dist=tmp_path / "missing")) as client:
+        response = client.get("/")
+
+    assert response.status_code == 503
+    assert "pnpm build" in response.json()["detail"]
 
 
 def test_auth_proxy_preserves_form_data_and_refresh_cookie() -> None:

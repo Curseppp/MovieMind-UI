@@ -11,7 +11,7 @@ from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 
 
-STATIC_DIR = Path(__file__).parent / "static"
+FRONTEND_DIST = Path(__file__).parent.parent / "frontend" / "dist"
 PROXY_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
 FORWARDED_REQUEST_HEADERS = {"accept", "authorization", "content-type", "cookie"}
 FORWARDED_RESPONSE_HEADERS = {
@@ -25,10 +25,12 @@ FORWARDED_RESPONSE_HEADERS = {
 def create_app(
     api_url: str | None = None,
     upstream_transport: httpx.AsyncBaseTransport | None = None,
+    frontend_dist: Path | None = None,
 ) -> FastAPI:
     upstream_url = (
         api_url or os.getenv("MOVIEMIND_API_URL", "http://127.0.0.1:8001")
     ).rstrip("/")
+    frontend_path = frontend_dist or FRONTEND_DIST
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
@@ -100,10 +102,6 @@ def create_app(
             response.headers.append("set-cookie", cookie)
         return response
 
-    @app.get("/", include_in_schema=False)
-    async def index() -> FileResponse:
-        return FileResponse(STATIC_DIR / "index.html")
-
     @app.get("/health", include_in_schema=False)
     async def health() -> dict[str, str]:
         return {"status": "ok"}
@@ -116,7 +114,29 @@ def create_app(
     async def api_proxy(request: Request, path: str) -> Response:
         return await forward(request, f"/{path}")
 
-    app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+    assets_path = frontend_path / "assets"
+    if assets_path.is_dir():
+        app.mount("/assets", StaticFiles(directory=assets_path), name="assets")
+
+    favicon_path = frontend_path / "favicon.svg"
+    if favicon_path.is_file():
+
+        @app.get("/favicon.svg", include_in_schema=False)
+        async def favicon() -> FileResponse:
+            return FileResponse(favicon_path)
+
+    @app.get("/{spa_path:path}", include_in_schema=False)
+    async def spa(spa_path: str) -> Response:
+        index_path = frontend_path / "index.html"
+        if not index_path.is_file():
+            return JSONResponse(
+                status_code=503,
+                content={
+                    "detail": "React-приложение не собрано. Выполните pnpm build."
+                },
+            )
+        return FileResponse(index_path)
+
     return app
 
 
