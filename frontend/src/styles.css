@@ -17,6 +17,10 @@
   box-sizing: border-box;
 }
 
+#root {
+  min-height: 100vh;
+}
+
 html {
   min-width: 320px;
   background: var(--ink);
@@ -415,6 +419,7 @@ input:disabled {
 .nav-link {
   position: relative;
   padding: 0 2px;
+  color: inherit;
   background: transparent;
   border: 0;
   font-family: var(--mono);
@@ -422,6 +427,7 @@ input:disabled {
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
+  text-decoration: none;
 }
 
 .nav-link::after {

@@ -1,0 +1,21 @@
+export const BASE_GENRES: Array<[string, string]> = [
+  ["Action", "Боевик"],
+  ["Adventure", "Приключения"],
+  ["Animation", "Анимация"],
+  ["Comedy", "Комедия"],
+  ["Crime", "Криминал"],
+  ["Documentary", "Документальный"],
+  ["Drama", "Драма"],
+  ["Family", "Семейный"],
+  ["Fantasy", "Фэнтези"],
+  ["History", "История"],
+  ["Horror", "Ужасы"],
+  ["Music", "Музыка"],
+  ["Mystery", "Детектив"],
+  ["Romance", "Мелодрама"],
+  ["Science Fiction", "Фантастика"],
+  ["Thriller", "Триллер"],
+  ["War", "Военный"],
+  ["Western", "Вестерн"],
+];
+

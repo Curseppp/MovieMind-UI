@@ -1,6 +1,9 @@
 .env
 .idea/
 .venv/
+frontend/dist/
+frontend/node_modules/
+frontend/coverage/
 __pycache__/
 .pytest_cache/
 .ruff_cache/
