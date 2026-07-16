@@ -1,0 +1,1 @@
+"""MovieMind UI application package."""
