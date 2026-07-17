@@ -40,6 +40,13 @@ export function MovieDialog({ movie, onClose }: MovieDialogProps) {
   }
 
   const isFavorite = favoriteIds.has(movie.tmdb_id);
+  const titleLength = movie.original_title.length;
+  const titleClassName =
+    titleLength > 55
+      ? "dialog-title dialog-title--compact"
+      : titleLength > 32
+        ? "dialog-title dialog-title--long"
+        : "dialog-title";
   const handleFavorite = async () => {
     setBusy(true);
     try {
@@ -84,7 +91,7 @@ export function MovieDialog({ movie, onClose }: MovieDialogProps) {
           <p className="eyebrow">
             КАРТОЧКА ФИЛЬМА · <span>TMDB {movie.tmdb_id}</span>
           </p>
-          <h2>{movie.original_title}</h2>
+          <h2 className={titleClassName}>{movie.original_title}</h2>
           <dl className="movie-facts">
             <div>
               <dt>Дата выхода</dt>
@@ -116,4 +123,3 @@ export function MovieDialog({ movie, onClose }: MovieDialogProps) {
     </dialog>
   );
 }
-
