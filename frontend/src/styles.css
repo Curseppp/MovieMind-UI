@@ -1043,7 +1043,6 @@ fieldset legend {
 
 .dialog-copy h2 {
   margin: 4px 0 34px;
-  overflow-wrap: anywhere;
   font-family: var(--display);
   font-size: clamp(3rem, 6vw, 5.5rem);
   letter-spacing: -0.025em;

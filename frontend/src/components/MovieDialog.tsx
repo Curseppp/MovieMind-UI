@@ -41,10 +41,13 @@ export function MovieDialog({ movie, onClose }: MovieDialogProps) {
 
   const isFavorite = favoriteIds.has(movie.tmdb_id);
   const titleLength = movie.original_title.length;
+  const longestWordLength = Math.max(
+    ...movie.original_title.split(/\s+/).map((word) => word.length),
+  );
   const titleClassName =
-    titleLength > 55
+    titleLength > 55 || longestWordLength >= 15
       ? "dialog-title dialog-title--compact"
-      : titleLength > 32
+      : titleLength > 32 || longestWordLength >= 9
         ? "dialog-title dialog-title--long"
         : "dialog-title";
   const handleFavorite = async () => {
